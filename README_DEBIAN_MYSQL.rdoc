@@ -5,14 +5,14 @@ After this guide you will have a Mortimer set up in production mode with apache 
 === GET REQUIREMENTS
 The first requirements you can get from the package manager:
 
-	sudo apt-get -y install mysql-server rake rubygems libsqlite3-ruby sqlite3 libsqlite3-dev libmysql-ruby libapache2-mod-passenger
+  sudo apt-get -y install mysql-server rake rubygems libsqlite3-ruby sqlite3 libsqlite3-dev libmysql-ruby libapache2-mod-passenger
 
 Bundler is not available as debian package and must be install manually:
-	sudo gem install bundler
+  sudo gem install bundler
 
 Grap the source, unzip it in the desired directory, then installthe needed bundles:
 
-	/var/lib/gems/1.8/bin/bundle install
+  /var/lib/gems/1.8/bin/bundle install
 
 (Mind: bundle will not be in the $PATH, you need to specify the whole path)
 
@@ -23,24 +23,24 @@ You need 3 databases set up. In this guide we will create all databases in mysql
 
 Create the mysql database:
 
-	mysqladmin -u root -p create mortimer
-	mysqladmin -u root -p create mortimer_dev
-	mysqladmin -u root -p create mortimer_dev
-	echo "GRANT ALL PRIVILEGES ON mortimer.* TO 'mortimer'@'localhost' IDENTIFIED BY '*\<PASSWORD>*';
-	GRANT ALL PRIVILEGES ON mortimer_dev.* TO 'mortimer'@'localhost' IDENTIFIED BY '*\<PASSWORD>*';
-	GRANT ALL PRIVILEGES ON mortimer_test.* TO 'mortimer'@'localhost' IDENTIFIED BY '*\<PASSWORD>*'; |mysql -u root -p
+  mysqladmin -u root -p create mortimer
+  mysqladmin -u root -p create mortimer_dev
+  mysqladmin -u root -p create mortimer_dev
+  echo "GRANT ALL PRIVILEGES ON mortimer.* TO 'mortimer'@'localhost' IDENTIFIED BY '*\<PASSWORD>*';
+  GRANT ALL PRIVILEGES ON mortimer_dev.* TO 'mortimer'@'localhost' IDENTIFIED BY '*\<PASSWORD>*';
+  GRANT ALL PRIVILEGES ON mortimer_test.* TO 'mortimer'@'localhost' IDENTIFIED BY '*\<PASSWORD>*'; |mysql -u root -p
 
 Copy the template and edit it:
-	cp config/database.yml{.template,} && $EDITOR config/database.yml
+  cp config/database.yml{.template,} && $EDITOR config/database.yml
 
 By default the development enviornment is used. You need to migrate the database in the development and production enviornment.
 
-	rake db:migrate
-	RAILS_ENV=production rake db:migrate
+  rake db:migrate
+  RAILS_ENV=production rake db:migrate
 
 === SET UP MORTIMER 
 Generate the site_key
-	rake auth:gen:site_key
+  rake auth:gen:site_key
 
 and edit the <tt>config/initializers/session_store.rb</tt>. Either change the secret or use the database.
 
@@ -48,31 +48,32 @@ run the setup. As with the database you will need to run this in both developmen
 
 <b>Don't forget to move the root_key.rsa after each step!</b>
 
-	rake setup
-	RAILS_ENV=production rake setup
+  rake setup
+  RAILS_ENV=production rake setup
 
 === APACHE
 You can add or edit a VirtualHost in Apache. The DocumentRoot needs to be set to the public directory of your mortimer installation, and the directory needs to have  MuliViews disabled.
 
-	<VirtualHost *:80>
-	    ServerName mortimer.localhost
-	    DocumentRoot /path/to/mortimer/public
-	    <Directory /path/to/mortimer/public>
-	        Allow from all
-		RailsEnv production
-	        Options -MultiViews
-	    </Directory>
-	</VirtualHost>
+  <VirtualHost *:80>
+    ServerName mortimer.localhost
+    DocumentRoot /path/to/mortimer/public
+    <Directory /path/to/mortimer/public>
+      Allow from all
+      RailsEnv production
+      Options -MultiViews
+    </Directory>
+  </VirtualHost>
 
 <em>The default environment for passenger is *production*</em>
 
 last but not least, restart your apache:
-	<tt>sudo apache2ctl graceful</tt>
+  sudo apache2ctl graceful
 === Endnotes
 You are all set. If you get an error, try first to run the WEBrick server standalone in both enviornments
-	script/rails server
+
+  script/rails server
 or
-	RAILS_ENV=production script/rails server
+  RAILS_ENV=production script/rails server
 
 and check if everything is working with your Webbrowser by going to http://IP:3000
 
